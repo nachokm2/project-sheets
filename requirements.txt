@@ -1,5 +1,6 @@
 flask
-gspread
-google-auth
+requests
+openai
 oauth2client
-pip install openai
+gspread
+# y cualquier otra librería que uses
