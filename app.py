@@ -1,21 +1,58 @@
-from flask import Flask, request, jsonify
-from sheets_query import consultar_matricula  # Asegúrate de tener esta función bien definida
+from openai import OpenAI
+import json
+import requests
 
-app = Flask(__name__)
+client = OpenAI()
 
-@app.route("/api/matricula", methods=["POST"])
-def api_matricula():
-    data = request.get_json()
-    identificador = data.get("identificador")
-    tipo = data.get("tipo")  # debe ser "correo", "rut" o "nombre"
+def buscar_estudiante(identificador, tipo):
+    response = requests.post("https://project-sheets.onrender.com/api/matricula", json={
+        "identificador": identificador,
+        "tipo": tipo
+    })
+    return response.json()
 
-    if not identificador or not tipo:
-        return jsonify({"error": "Faltan parámetros 'identificador' o 'tipo'"}), 400
+# Crear un hilo
+thread = client.beta.threads.create()
 
-    resultado = consultar_matricula(identificador, tipo)
-    return jsonify(resultado)
+# Agregar mensaje del usuario
+client.beta.threads.messages.create(
+    thread_id=thread.id,
+    role="user",
+    content="¿Cuál es el estado de matrícula del estudiante con RUT 12345678-9?"
+)
 
-if __name__ == "__main__":
-    from os import getenv
-    port = int(getenv("PORT", 5000))  # Puerto asignado por Render, 5000 por defecto si no existe
-    app.run(host="0.0.0.0", port=port)
+# Ejecutar el asistente
+run = client.beta.threads.runs.create(
+    thread_id=thread.id,
+    assistant_id="asst_eh2jnFxcgzhVif20Nnt0PmUh"
+)
+
+# Esperar respuesta
+while True:
+    run_info = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+
+    if run_info.status == "completed":
+        break
+
+    if run_info.status == "requires_action":
+        for call in run_info.required_action.submit_tool_outputs.tool_calls:
+            if call.function.name == "buscar_estudiante":
+                args = json.loads(call.function.arguments)
+                resultado = buscar_estudiante(args["identificador"], args["tipo"])
+
+                # Enviar resultado al asistente
+                client.beta.threads.runs.submit_tool_outputs(
+                    thread_id=thread.id,
+                    run_id=run.id,
+                    tool_outputs=[
+                        {
+                            "tool_call_id": call.id,
+                            "output": json.dumps(resultado)
+                        }
+                    ]
+                )
+
+# Mostrar respuesta final
+mensajes = client.beta.threads.messages.list(thread_id=thread.id)
+for msg in mensajes.data:
+    print(msg.role, ":", msg.content[0].text.value)
