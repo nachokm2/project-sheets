@@ -4,14 +4,13 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 def consultar_matricula(identificador, tipo):
-    # Cargar las credenciales desde la variable de entorno (Render)
-    creds_dict = json.loads(os.environ["GOOGLE_CREDS"])
+    # Obtiene y reinterpreta el JSON con saltos de línea reales
+    raw_creds = os.environ["GOOGLE_CREDS"].replace('\\n', '\n')
+    creds_dict = json.loads(raw_creds)
 
-    # Autenticación moderna
     creds = Credentials.from_service_account_info(creds_dict)
     client = gspread.authorize(creds)
 
-    # Acceder a la hoja
     sheet = client.open("Copia de 2025 CONSOLIDADO MATRÍCULAS POSTGRADOS CHILE").worksheet("MATRÍCULAS CHILE")
     data = sheet.get_all_records()
 
