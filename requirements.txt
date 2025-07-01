@@ -1,6 +1,5 @@
-flask
-requests
-openai
-oauth2client
-gspread
-# y cualquier otra librería que uses
+flask==2.3.2
+requests==2.31.0
+openai==0.27.8
+oauth2client==4.1.3
+gspread==5.7.2
