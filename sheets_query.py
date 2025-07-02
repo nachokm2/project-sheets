@@ -54,7 +54,7 @@ def consultar_oferta(nombre_programa=None, sede=None, modalidad=None):
         resultados = []
 
         for fila in data:
-            nombre = fila.get("Programa", "").lower()
+            nombre = fila.get("Nombre de los programas", "").lower()  # <-- aquí está el cambio
             sede_actual = fila.get("Sede", "").lower()
             modalidad_actual = fila.get("Modalidad", "").lower()
 
