@@ -37,6 +37,11 @@ def consultar_matricula(identificador, tipo):
 
 
 def consultar_oferta(nombre_programa=None, sede=None, modalidad=None):
+    import os
+    import json
+    import gspread
+    from google.oauth2.service_account import Credentials
+
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
     try:
