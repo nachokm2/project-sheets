@@ -53,7 +53,7 @@ def consultar_oferta(nombre_programa=None, sede=None, modalidad=None):
 
         resultados = []
 
-        # Normalizar filtros para búsqueda flexible
+        # Normalizamos los filtros para hacer búsquedas case insensitive y sin espacios extras
         filtro_nombre = nombre_programa.lower().strip() if nombre_programa else None
         filtro_sede = sede.lower().strip() if sede else None
         filtro_modalidad = modalidad.lower().strip() if modalidad else None
@@ -61,15 +61,25 @@ def consultar_oferta(nombre_programa=None, sede=None, modalidad=None):
         for fila in data:
             nombre = fila.get("Nombre de los programas", "").lower().strip()
             sede_actual = fila.get("Sede", "").lower().strip()
-            modalidad_actual = fila.get("Modalidad", "").lower().strip()
-
-            # Para debug, imprime los datos que compara
-            print(f"Comparando: {nombre} / {sede_actual} / {modalidad_actual}")
+            modalidad_actual = fila.get("MODALIDAD", "").lower().strip()  # Fíjate que en tu hoja la columna es en mayúsculas
 
             if (not filtro_nombre or filtro_nombre in nombre) and \
                (not filtro_sede or filtro_sede in sede_actual) and \
                (not filtro_modalidad or filtro_modalidad in modalidad_actual):
-                resultados.append(fila)
+                resultados.append({
+                    "Programa": fila.get("PROGRAMAS", ""),
+                    "Nombre de los programas": fila.get("Nombre de los programas", ""),
+                    "Duración": fila.get("DURACIÓN", ""),
+                    "Matrícula": fila.get("Matrícula", ""),
+                    "Valores Arancel": fila.get("VALORES ARANCEL", ""),
+                    "Modalidad": fila.get("MODALIDAD", ""),
+                    "Sede": fila.get("Sede", ""),
+                    "Categoría": fila.get("CATEGORÍA", ""),
+                    "Año": fila.get("AÑO", ""),
+                    "Estado": fila.get("ESTADO PARA VENTA", ""),
+                    "Asesor 1": fila.get("ASESOR 1", ""),
+                    # Puedes añadir más campos que quieras mostrar
+                })
 
         if resultados:
             return {"programas": resultados}
