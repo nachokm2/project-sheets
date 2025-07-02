@@ -53,14 +53,22 @@ def consultar_oferta(nombre_programa=None, sede=None, modalidad=None):
 
         resultados = []
 
-        for fila in data:
-            nombre = fila.get("Nombre de los programas", "").lower()  # <-- aquí está el cambio
-            sede_actual = fila.get("Sede", "").lower()
-            modalidad_actual = fila.get("Modalidad", "").lower()
+        # Normalizar filtros para búsqueda flexible
+        filtro_nombre = nombre_programa.lower().strip() if nombre_programa else None
+        filtro_sede = sede.lower().strip() if sede else None
+        filtro_modalidad = modalidad.lower().strip() if modalidad else None
 
-            if (not nombre_programa or nombre_programa.lower() in nombre) and \
-               (not sede or sede.lower() in sede_actual) and \
-               (not modalidad or modalidad.lower() in modalidad_actual):
+        for fila in data:
+            nombre = fila.get("Nombre de los programas", "").lower().strip()
+            sede_actual = fila.get("Sede", "").lower().strip()
+            modalidad_actual = fila.get("Modalidad", "").lower().strip()
+
+            # Para debug, imprime los datos que compara
+            print(f"Comparando: {nombre} / {sede_actual} / {modalidad_actual}")
+
+            if (not filtro_nombre or filtro_nombre in nombre) and \
+               (not filtro_sede or filtro_sede in sede_actual) and \
+               (not filtro_modalidad or filtro_modalidad in modalidad_actual):
                 resultados.append(fila)
 
         if resultados:
